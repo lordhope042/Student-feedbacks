@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Student Dashboard – HAFEDPOLY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+  body{min-height:100vh;margin:0;background:linear-gradient(135deg,#007bff,#00c6ff);color:#333;overflow-x:hidden;}
+  header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1);position:sticky;top:0;z-index:1000}
+  header h1{margin:0;font-size:20px;color:#007bff}
+  .hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+  .hamburger span{display:block;height:3px;background:#007bff;border-radius:2px;transition:.3s}
+  .hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg)}
+  .hamburger.active span:nth-child(2){opacity:0}
+  .hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg)}
+  nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;z-index:999}
+  nav.active{right:0}
+  nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600}
+  .container{padding:20px;max-width:1000px;margin:0 auto}
+  .box{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+  h2{margin:0 0 12px;font-size:18px;color:#007bff}
+  p{margin:6px 0;color:#444}
+  button{padding:10px 16px;border:none;border-radius:8px;background:#007bff;color:#fff;font-weight:600;cursor:pointer}
+  button:hover{background:#005ecb}
+  .profile-row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .profile-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e6f3ff;background:#f0f6ff}
+  .profile-info{flex:1;min-width:220px}
+  .small{font-size:13px;color:#666;margin-top:6px}
+  .img-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .btn-ghost{background:transparent;border:1px solid #ddd;color:#007bff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .btn-danger{background:#dc3545;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .note{font-size:13px;color:#666;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Student Dashboard</h1>
+  <div class="hamburger" id="hamburger" title="Menu"><span></span><span></span><span></span></div>
+</header>
+
+<nav id="nav">
+  <a href="#profile">Profile</a>
+  <a href="submit-complaint.html">Submit Complaint</a>
+  <a href="submit-suggestion.html">Submit Suggestion</a>
+  <a href="#history">My Submissions</a>
+  <a href="track.html">Track Complaint</a>
+  <a href="#" id="logoutLink">Logout</a>
+</nav>
+
+<div class="container">
+  <!-- Profile Section -->
+  <div class="box" id="profile">
+    <h2>My Profile</h2>
+    <div class="profile-row">
+      <div>
+        <img id="sPic" class="profile-img" src="https://via.placeholder.com/240x240.png?text=No+Photo" alt="Profile picture">
+        <div class="img-actions">
+          <button class="btn-ghost" id="addPhotoBtn">Add Photo</button>
+          <button class="btn-ghost" id="changePhotoBtn" style="display:none">Change Photo</button>
+          <button class="btn-danger" id="removePhotoBtn" style="display:none">Remove Photo</button>
+          <input type="file" id="uploadPic" accept="image/*" style="display:none">
+        </div>
+        <div class="note">Tip: Images are resized client-side to save storage (keeps uploads fast).</div>
+      </div>
+      <div class="profile-info">
+        <p><strong>Name:</strong> <span id="sname"></span></p>
+        <p><strong>Email:</strong> <span id="semail"></span></p>
+        <p><strong>Reg No:</strong> <span id="sregno"></span></p>
+        <p><strong>Level:</strong> <span id="slevel"></span></p>
+        <p><strong>Department:</strong> <span id="sdept"></span></p>
+        <p><strong>Unique ID:</strong> <span id="suid"></span></p>
+        <p class="small">Only name, email, picture can be changed here. Reg No is fixed.</p>
+        <div style="margin-top:12px"><button onclick="editProfile()">Edit Profile</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complaints -->
+  <div class="box" id="complaints">
+    <h2>Submit Complaint</h2>
+    <p>Form coming here…</p>
+  </div>
+<div class="box" id="announcements">
+  <h2>Announcements</h2>
+  <div id="annList">Loading...</div>
+</div>
+
+<script>
+const annList = document.getElementById("annList");
+const announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
+
+if(announcements.length === 0){
+  annList.innerHTML = "<p>No announcements at the moment.</p>";
+} else {
+  annList.innerHTML = announcements.map(a=>`
+    <div style="margin-bottom:12px; padding:10px; border:1px solid #ddd; border-radius:8px;">
+      <strong>${a.title}</strong><br>
+      <small>${a.date}</small>
+      <p>${a.message}</p>
+    </div>
+  `).join("");
+}
+</script>
+  <!-- Suggestions -->
+  <div class="box" id="suggestions">
+    <h2>Submit Suggestion</h2>
+    <p>Form coming here…</p>
+  </div>
+
+  <!-- History -->
+  <div class="box" id="history">
+    <h2>My Submissions</h2>
+    <p>List will show here…</p>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const hamburger = $("hamburger");
+const nav = $("nav");
+const uploadInput = $("uploadPic");
+const addBtn = $("addPhotoBtn");
+const changeBtn = $("changePhotoBtn");
+const removeBtn = $("removePhotoBtn");
+const picEl = $("sPic");
+
+// Hamburger toggle
+hamburger.onclick = () => { hamburger.classList.toggle("active"); nav.classList.toggle("active"); };
+
+// Resize image helper
+function resizeImageFileToDataURL(file, maxSize=800, quality=0.8){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Invalid image file"));
+      img.onload = () => {
+        let {width,height} = img;
+        const maxDim = Math.max(width,height);
+        if(maxDim>maxSize){const scale=maxSize/maxDim;width=Math.round(width*scale);height=Math.round(height*scale);}
+        const canvas=document.createElement("canvas");
+        canvas.width=width; canvas.height=height;
+        canvas.getContext("2d").drawImage(img,0,0,width,height);
+        resolve(canvas.toDataURL("image/jpeg",quality));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Save active student
+function saveActiveStudentAndList(active){
+  localStorage.setItem("activeStudent",JSON.stringify(active));
+  let users = JSON.parse(localStorage.getItem("users")||"[]");
+  const idx = users.findIndex(u=>u.regno===active.regno);
+  if(idx>-1) users[idx] = {...users[idx], ...active};
+  else users.push(active);
+  localStorage.setItem("users",JSON.stringify(users));
+}
+
+// Update photo buttons
+function updatePhotoButtons(active){
+  if(active && active.pic && active.pic.length>10){
+    picEl.src = active.pic;
+    addBtn.style.display = "none";
+    changeBtn.style.display = "inline-block";
+    removeBtn.style.display = "inline-block";
+  } else {
+    picEl.src = "https://via.placeholder.com/240x240.png?text=No+Photo";
+    addBtn.style.display = "inline-block";
+    changeBtn.style.display = "none";
+    removeBtn.style.display = "none";
+  }
+}
+
+// Load profile
+function loadProfile(){
+  const active = JSON.parse(localStorage.getItem("activeStudent") || "null");
+  if(!active){ alert("Session expired. Please log in."); location.href="login.html"; return; }
+
+  $("sname").textContent = active.name || active.fullname || "";
+  $("semail").textContent = active.email || "";
+  $("sregno").textContent = active.regno || "";
+  $("slevel").textContent = active.level || "";
+  $("sdept").textContent = active.department || active.dept || "";
+  $("suid").textContent = active.uniqueId || "N/A";
+
+  updatePhotoButtons(active);
+}
+
+// File input handlers
+addBtn.addEventListener("click",()=>uploadInput.click());
+changeBtn.addEventListener("click",()=>uploadInput.click());
+uploadInput.addEventListener("change",async(e)=>{
+  const file = e.target.files[0]; uploadInput.value="";
+  if(!file) return;
+  if(!file.type.startsWith("image/")){ alert("Select an image file."); return; }
+
+  try{
+    const dataUrl = await resizeImageFileToDataURL(file,900,0.8);
+    const active = JSON.parse(localStorage.getItem("activeStudent") || "null");
+    if(!active){ alert("Session expired."); location.href="login.html"; return; }
+
+    active.pic = dataUrl;
+    saveActiveStudentAndList(active);
+    updatePhotoButtons(active);
+    alert("Profile photo updated.");
+  } catch(err){
+    console.error(err);
+    alert("Failed to process image. Try a smaller file.");
+  }
+});
+
+// Remove photo
+removeBtn.addEventListener("click",()=>{
+  if(!confirm("Remove profile photo?")) return;
+  const active = JSON.parse(localStorage.getItem("activeStudent") || "null");
+  if(!active){ alert("Session expired."); location.href="login.html"; return; }
+
+  active.pic = "";
+  saveActiveStudentAndList(active);
+  updatePhotoButtons(active);
+});
+
+// Edit profile
+function editProfile(){
+  const active = JSON.parse(localStorage.getItem("activeStudent") || "null");
+  if(!active){ alert("Session expired."); location.href="login.html"; return; }
+
+  const newName = prompt("Edit full name:", active.name || active.fullname || "");
+  if(newName===null) return;
+  const newEmail = prompt("Edit email:", active.email || "");
+  if(newEmail===null) return;
+
+  active.name = newName.trim() || active.name;
+  active.fullname = active.name;
+  active.email = newEmail.trim() || active.email;
+
+  saveActiveStudentAndList(active);
+  loadProfile();
+  alert("Profile updated.");
+}
+
+// Logout
+$("logoutLink").addEventListener("click",(e)=>{
+  e.preventDefault();
+  localStorage.removeItem("activeStudent");
+  location.href="login.html";
+});
+
+// Initialize
+loadProfile();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login – HAFEDPOLY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(135deg,#007bff,#00c6ff);}
+    .box{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:24px 20px;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:fade .5s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    h1{margin:0 0 8px;color:#007bff;font-size:22px;text-align:center}
+    p.sub{margin:0 0 16px;text-align:center;color:#555}
+    label{font-weight:600;color:#333;margin-top:10px;display:block}
+    input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;margin-top:6px;outline:none;transition:.2s}
+    input:focus{border-color:#007bff;box-shadow:0 0 0 4px rgba(0,123,255,.12)}
+    .pass-wrap{position:relative}
+    .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#007bff;cursor:pointer;user-select:none}
+    button{width:100%;padding:12px;border:none;border-radius:10px;background:#007bff;color:#fff;font-weight:700;margin-top:16px;cursor:pointer}
+    button:hover{background:#005ecb}
+    .msg{margin-top:10px;text-align:center;font-weight:600}
+    .err{color:#d60000}.ok{color:#188038}
+    .small{margin-top:10px;text-align:center}
+    .small a{color:#007bff;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Login</h1>
+    <p class="sub">HAFEDPOLY Portal</p>
+
+    <form id="form">
+      <label>Reg No or Email</label>
+      <input id="userId" placeholder="e.g. NDCS/22/034 or admin@mail.com" required />
+
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input id="password" type="password" placeholder="Enter password" required />
+        <span class="toggle" id="togglePass">Show</span>
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <div id="msg" class="msg"></div>
+    <div class="small">No account? <a href="register.html">Register</a></div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const msg = $("msg");
+
+    // Toggle password visibility
+    $("togglePass").onclick = () => {
+      const f = $("password");
+      f.type = f.type === "password" ? "text" : "password";
+      $("togglePass").textContent = f.type === "password" ? "Show" : "Hide";
+    };
+
+    // Generate unique ID
+    function genUniqueId() {
+      return "HAF-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
+    }
+
+    $("form").addEventListener("submit", e => {
+      e.preventDefault();
+      msg.textContent = ""; 
+      msg.className = "msg";
+
+      const userId = $("userId").value.trim();
+      const password = $("password").value.trim();
+
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      let user = null;
+
+      // Match by Email or RegNo
+      if(userId.includes("@")){
+        user = users.find(u => u.email.toLowerCase() === userId.toLowerCase() && u.password === password);
+      } else {
+        user = users.find(u => u.regno.toUpperCase() === userId.toUpperCase() && u.password === password);
+      }
+
+      if(!user){
+        msg.textContent = "Invalid credentials. Please try again.";
+        msg.classList.add("err");
+        return;
+      }
+
+      // Ensure uniqueId exists
+      if(!user.uniqueId){
+        user.uniqueId = genUniqueId();
+        const idx = users.findIndex(u => u.regno === user.regno);
+        if(idx > -1) users[idx] = user;
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+
+      // Save active session
+      localStorage.setItem("activeStudent", JSON.stringify(user));
+      msg.textContent = `Welcome, ${user.name}! Redirecting...`;
+      msg.classList.add("ok");
+
+      // Redirect based on role
+      setTimeout(() => {
+        location.href = user.role === "admin" ? "admin-dashboard.html" : "student-dashboard.html";
+      }, 700);
+    });
+
+    // Create default admin if none exists
+    let users = JSON.parse(localStorage.getItem("users")||"[]");
+    if(!users.some(u => u.role === "admin")){
+      users.push({
+        uniqueId: "HAF-ADMIN",
+        name: "Admin",
+        email: "admin@hafedpoly.edu.ng",
+        regno: "ADMIN001",
+        password: "admin123",
+        role: "admin"
+      });
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+  </script>
+</body>
+</html>

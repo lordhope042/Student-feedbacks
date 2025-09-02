@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard – HAFEDPOLY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+    body{margin:0;background:#f0f6ff;color:#333;overflow-x:hidden;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1);position:sticky;top:0;z-index:1000;}
+    header h1{margin:0;font-size:20px;color:#007bff;}
+    .hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+    .hamburger span{display:block;height:3px;background:#007bff;border-radius:2px;transition:.3s;}
+    .hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg);}
+    .hamburger.active span:nth-child(2){opacity:0;}
+    .hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg);}
+    nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;z-index:999;}
+    nav.active{right:0;}
+    nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600;}
+    .container{padding:20px;max-width:1200px;margin:0 auto;}
+    .box{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,0,0,.15);}
+    h2{margin:0 0 12px;font-size:18px;color:#007bff;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    th, td{border:1px solid #ccc;padding:8px;text-align:left;}
+    th{background:#007bff;color:#fff;}
+    button.action{padding:6px 10px;margin-right:4px;border:none;border-radius:6px;cursor:pointer;color:#fff;}
+    .impersonate{background:#28a745;}
+    .showpw{background:#17a2b8;}
+    .edit{background:#ffc107;color:#000;}
+    .delete{background:#dc3545;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Admin Dashboard</h1>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</header>
+
+<nav id="nav">
+  <a href="#dashboard">Dashboard</a>
+  <a href="#students">Students</a>
+  <a href="admin-complaints.html">Complaints</a>
+  <a href="#suggestions">Suggestions</a>
+  <a href="#orders">Orders</a>
+  <a href="admin-verify.html">Verify IDs</a>
+  <a href="#announcements">Announcements</a>
+  <a href="#" id="logoutLink">Logout</a>
+</nav>
+
+<div class="container">
+  <!-- Dashboard -->
+  <div class="box" id="dashboard">
+    <h2>Dashboard Overview</h2>
+    <p>Total Students: <span id="totalStudents">0</span></p>
+    <p>Total Complaints: <span id="totalComplaints">0</span></p>
+    <p>Total Suggestions: <span id="totalSuggestions">0</span></p>
+  </div>
+
+  <!-- Students Management -->
+  <div class="box" id="students">
+    <h2>Students Management</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Reg No</th><th>Email</th><th>Level</th><th>Department</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Complaints -->
+  <div class="box" id="complaints">
+    <h2>Complaints</h2>
+    <p>List of complaints goes here.</p>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="box" id="suggestions">
+    <h2>Suggestions</h2>
+    <p>List of suggestions goes here.</p>
+  </div>
+
+  <!-- Orders -->
+  <div class="box" id="orders">
+    <h2>Orders</h2>
+    <p>List of student orders goes here.</p>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const hamburger=$("hamburger");
+const nav=$("nav");
+hamburger.onclick=()=>{hamburger.classList.toggle("active");nav.classList.toggle("active");};
+
+function loadOverview(){
+  const students=JSON.parse(localStorage.getItem("users")||"[]").filter(u=>u.role==="student");
+  $("totalStudents").textContent=students.length;
+  const tbody=$("studentsBody");
+  tbody.innerHTML="";
+  students.forEach(s=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${s.uniqueId}</td>
+      <td>${s.name}</td>
+      <td>${s.regno}</td>
+      <td>${s.email}</td>
+      <td>${s.level}</td>
+      <td>${s.department}</td>
+      <td>
+        <button class="action impersonate" onclick='impersonate("${s.regno}")'>Impersonate</button>
+        <button class="action showpw" onclick='revealPassword("${s.regno}")'>Show PW</button>
+        <button class="action edit" onclick='editStudent("${s.regno}")'>Edit</button>
+        <button class="action delete" onclick='deleteStudent("${s.regno}")'>Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function impersonate(regno){
+  const users=JSON.parse(localStorage.getItem("users")||"[]");
+  const student=users.find(u=>u.regno===regno);
+  if(!student) return alert("Student not found.");
+  localStorage.setItem("activeStudent",JSON.stringify(student));
+  alert(`Now impersonating ${student.name}`);
+  window.location.href="student-dashboard.html";
+}
+
+function revealPassword(regno){
+  const users=JSON.parse(localStorage.getItem("users")||"[]");
+  const student=users.find(u=>u.regno===regno);
+  if(!student) return alert("Student not found.");
+  alert(`Password for ${student.name}: ${student.password}`);
+}
+
+function editStudent(regno){
+  const users=JSON.parse(localStorage.getItem("users")||"[]");
+  const student=users.find(u=>u.regno===regno);
+  if(!student) return alert("Student not found.");
+  const newName=prompt("Edit name:",student.name);
+  if(newName!==null) student.name=newName.trim()||student.name;
+  const newEmail=prompt("Edit email:",student.email);
+  if(newEmail!==null) student.email=newEmail.trim()||student.email;
+  localStorage.setItem("users",JSON.stringify(users));
+  loadOverview();
+  alert("Student updated.");
+}
+
+function deleteStudent(regno){
+  if(!confirm("Delete this student?")) return;
+  let users=JSON.parse(localStorage.getItem("users")||"[]");
+  users=users.filter(u=>u.regno!==regno);
+  localStorage.setItem("users",JSON.stringify(users));
+  loadOverview();
+  alert("Student deleted.");
+}
+
+$("logoutLink").addEventListener("click",e=>{
+  e.preventDefault();
+  localStorage.removeItem("activeStudent");
+  window.location.href="login.html";
+});
+
+// Initialize
+loadOverview();
+</script>
+</body>
+</html>

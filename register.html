@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register – HAFEDPOLY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(135deg,#007bff,#00c6ff);}
+    .box{width:100%;max-width:460px;background:#fff;border-radius:16px;padding:24px 20px;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:fade .5s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    h1{margin:0 0 8px;color:#007bff;font-size:22px;text-align:center}
+    p.sub{margin:0 0 16px;text-align:center;color:#555}
+    label{font-weight:600;color:#333;margin-top:10px;display:block}
+    input,select{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;margin-top:6px;outline:none;transition:.2s}
+    input:focus,select:focus{border-color:#007bff;box-shadow:0 0 0 4px rgba(0,123,255,.12)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .pass-wrap{position:relative}
+    .toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#007bff;cursor:pointer;user-select:none}
+    button{width:100%;padding:12px;border:none;border-radius:10px;background:#007bff;color:#fff;font-weight:700;margin-top:16px;cursor:pointer}
+    button:hover{background:#005ecb}
+    .msg{margin-top:10px;text-align:center;font-weight:600}
+    .err{color:#d60000}.ok{color:#188038}
+    .small{margin-top:10px;text-align:center}
+    .small a{color:#007bff;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Student Registration</h1>
+    <p class="sub">HAFEDPOLY Portal</p>
+
+    <form id="form">
+      <label>Full Name</label>
+      <input id="name" placeholder="e.g. Aisha Bello" required />
+
+      <label>Email</label>
+      <input id="email" type="email" placeholder="e.g. aisha@mail.com" required />
+
+      <label>Reg No</label>
+      <input id="regno" placeholder="e.g. NDCS/22/034" required />
+
+      <div class="row">
+        <div>
+          <label>Level</label>
+          <select id="level" required>
+            <option value="">-- Select Level --</option>
+            <option>ND1</option><option>ND2</option>
+            <option>HND1</option><option>HND2</option>
+          </select>
+        </div>
+        <div>
+          <label>Department (auto)</label>
+          <input id="dept" placeholder="Auto from Reg No" readonly />
+        </div>
+      </div>
+
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input id="password" type="password" placeholder="Min 6 characters" required />
+        <span class="toggle" id="togglePass">Show</span>
+      </div>
+
+      <button type="submit">Create Account</button>
+    </form>
+
+    <div id="msg" class="msg"></div>
+    <div class="small">Already have an account? <a href="login.html">Login</a></div>
+  </div>
+
+  <script>
+    // Dept mapping (short code => full name)
+    const DEPARTMENTS = {
+      CS:"Computer Science", SLT:"Science Laboratory Technology", BAM:"Business Administration",
+      ACC:"Accountancy", BF:"Banking & Finance", MASS:"Mass Communication", EE:"Electrical Engineering",
+      CENG:"Computer Engineering", CE:"Civil Engineering", ME:"Mechanical Engineering",
+      MEC:"Mechatronics", ARCH:"Architectural Technology", STAT:"Mathematics & Statistics",
+      PAD:"Public Administration", LIS:"Library Science", QS:"Quantity Surveying", EM:"Estate Management",
+      BT:"Building Technology", URP:"Urban & Regional Planning", PT:"Polymer Technology", 
+      FT:"Fishery Technology", AGT:"Agricultural Technology", HM:"Hospitality Management", 
+      FDCT:"Fashion Design"
+    };
+
+    // RegNo rules: NDCS/22/034 or HNDCS/22/034
+    const REGEX = /^(ND|HND)([A-Z]{2,5})\/(\d{2})\/(0\d{2})$/;
+
+    const $ = id => document.getElementById(id);
+    const msg = $("msg");
+
+    // Show/Hide password
+    $("togglePass").onclick = () => {
+      const f = $("password");
+      f.type = f.type === "password" ? "text" : "password";
+      $("togglePass").textContent = f.type === "password" ? "Show" : "Hide";
+    };
+
+    // Auto-fill department as user types regno
+    $("regno").addEventListener("input", () => {
+      const reg = $("regno").value.toUpperCase().trim();
+      const m = reg.match(/^(ND|HND)([A-Z]{2,5})\//);
+      $("dept").value = m ? (DEPARTMENTS[m[2]] || "") : "";
+    });
+
+    // Generate unique ID
+    function genId(){
+      return ("HAF-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,6)).toUpperCase();
+    }
+
+    $("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      msg.textContent = ""; msg.className = "msg";
+
+      const name = $("name").value.trim();
+      const email = $("email").value.trim();
+      const regno = $("regno").value.toUpperCase().trim();
+      const level = $("level").value;
+      const password = $("password").value.trim();
+
+      if (password.length < 6){
+        msg.textContent = "Password must be at least 6 characters."; msg.classList.add("err"); return;
+      }
+      if (!REGEX.test(regno)){
+        msg.textContent = "Invalid Reg No! Example: NDCS/22/034"; msg.classList.add("err"); return;
+      }
+
+      const deptCode = regno.match(REGEX)[2];
+      const department = DEPARTMENTS[deptCode];
+      if (!department){
+        msg.textContent = "Department code not recognized in Reg No."; msg.classList.add("err"); return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      // Prevent duplicate RegNo or Email
+      if (users.some(u => u.regno === regno)){
+        msg.textContent = "Reg No already registered."; msg.classList.add("err"); return;
+      }
+      if (users.some(u => u.email === email)){
+        msg.textContent = "Email already registered."; msg.classList.add("err"); return;
+      }
+
+      const user = {
+        id: genId(),
+        name, email, regno, level, department, password,
+        pic: "",
+        role: "student" // 🔹 unified role system
+      };
+
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+
+      msg.textContent = "Registered successfully! Unique ID: " + user.id;
+      msg.classList.add("ok");
+
+      // Auto login after register
+      localStorage.setItem("activeUser", JSON.stringify(user));
+
+      // Redirect
+      setTimeout(() => location.href = "login.html", 800);
+    });
+  </script>
+</body>
+</html>

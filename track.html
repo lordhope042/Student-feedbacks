@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Track Submissions – HAFEDPOLY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+    body{min-height:100vh;margin:0;background:linear-gradient(135deg,#007bff,#00c6ff);color:#333;padding:20px;display:flex;justify-content:center;align-items:flex-start;}
+    .container{width:100%;max-width:900px;background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.15);}
+    h1{text-align:center;color:#007bff;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+    th, td{border:1px solid #ccc;padding:10px;text-align:left;border-radius:6px;}
+    th{background:#007bff;color:#fff;}
+    .status{font-weight:600;}
+    .Pending{color:#d68c00;}
+    .Resolved{color:#188038;}
+    .msg{margin-top:10px;font-weight:600;text-align:center;}
+    button{padding:10px 14px;border:none;border-radius:8px;background:#007bff;color:#fff;font-weight:600;cursor:pointer;margin-top:10px;}
+    button:hover{background:#005ecb;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Submissions</h1>
+
+    <h2>Complaints</h2>
+    <table id="complaintsTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Title/Description</th><th>Date</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Suggestions</h2>
+    <table id="suggestionsTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Title</th><th>Category</th><th>Date</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script>
+    const complaintsTable = document.getElementById("complaintsTable").querySelector("tbody");
+    const suggestionsTable = document.getElementById("suggestionsTable").querySelector("tbody");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Load active student
+    const active = JSON.parse(localStorage.getItem("activeStudent") || "null");
+    if(!active){ alert("Session expired. Please login."); location.href="login.html"; }
+
+    // Load complaints
+    const complaints = JSON.parse(localStorage.getItem("complaints") || "[]")
+      .filter(c => c.userId === active.uniqueId);
+
+    if(complaints.length){
+      complaints.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${c.id}</td><td>${c.desc}</td><td>${c.date}</td><td class="status ${c.status}">${c.status}</td>`;
+        complaintsTable.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="4" style="text-align:center;">No complaints submitted yet.</td>`;
+      complaintsTable.appendChild(tr);
+    }
+
+    // Load suggestions
+    const suggestions = JSON.parse(localStorage.getItem("suggestions") || "[]")
+      .filter(s => s.userId === active.uniqueId);
+
+    if(suggestions.length){
+      suggestions.forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${s.id}</td><td>${s.title}</td><td>${s.category}</td><td>${s.date}</td><td class="status ${s.status}">${s.status}</td>`;
+        suggestionsTable.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="5" style="text-align:center;">No suggestions submitted yet.</td>`;
+      suggestionsTable.appendChild(tr);
+    }
+
+    // Logout
+    logoutBtn.addEventListener("click", ()=>{
+      localStorage.removeItem("activeStudent");
+      location.href="login.html";
+    });
+  </script>
+</body>

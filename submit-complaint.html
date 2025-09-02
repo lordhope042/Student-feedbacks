@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Submit Complaint – HAFEDPOLY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+  body{min-height:100vh;margin:0;background:linear-gradient(135deg,#007bff,#00c6ff);color:#333;overflow-x:hidden;}
+  header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1);position:sticky;top:0;z-index:1000}
+  header h1{margin:0;font-size:20px;color:#007bff}
+  .hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+  .hamburger span{display:block;height:3px;background:#007bff;border-radius:2px;transition:.3s}
+  .hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg)}
+  .hamburger.active span:nth-child(2){opacity:0}
+  .hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg)}
+  nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;z-index:999}
+  nav.active{right:0}
+  nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600}
+  .container{padding:20px;max-width:600px;margin:20px auto;background:#fff;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.15);}
+  h2{margin-top:0;color:#007bff;text-align:center;}
+  label{display:block;margin-top:12px;font-weight:600;}
+  input, textarea, select{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid #ccc;outline:none;transition:.2s;}
+  input:focus,textarea:focus,select:focus{border-color:#007bff;box-shadow:0 0 0 4px rgba(0,123,255,.12);}
+  button{margin-top:16px;padding:12px 18px;border:none;border-radius:8px;background:#007bff;color:#fff;font-weight:600;cursor:pointer;}
+  button:hover{background:#005ecb;}
+  .msg{text-align:center;margin-top:12px;font-weight:600;}
+  .anon-wrap{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:14px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Submit Complaint</h1>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</header>
+
+<nav id="nav">
+  <a href="student-dashboard.html">Dashboard</a>
+  <a href="submit-suggestion.html">Submit Suggestion</a>
+  <a href="track.html">Track Submissions</a>
+  <a href="#" id="logoutLink">Logout</a>
+</nav>
+
+<div class="container">
+  <h2>Complaint Form</h2>
+  <form id="complaintForm">
+    <label>Category</label>
+    <select id="category" required>
+      <option value="">-- Select Category --</option>
+      <option value="Academic">Academic</option>
+      <option value="Facilities">Facilities</option>
+      <option value="Insecurity">Insecurity</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label>Title</label>
+    <input type="text" id="title" placeholder="Short title" required>
+    
+    <label>Description</label>
+    <textarea id="desc" placeholder="Explain your complaint..." rows="4" required></textarea>
+    
+    <div class="anon-wrap">
+      <input type="checkbox" id="anonymous">
+      <label for="anonymous">Submit anonymously</label>
+    </div>
+
+    <button type="submit">Submit Complaint</button>
+  </form>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const hamburger = $("hamburger");
+const nav = $("nav");
+hamburger.onclick = () => { hamburger.classList.toggle("active"); nav.classList.toggle("active"); };
+
+// Active student session
+const active = JSON.parse(localStorage.getItem("activeStudent")||"null");
+if(!active){ alert("Session expired. Please login."); location.href="login.html"; }
+
+// Unique ID generator
+function generateUniqueId(prefix="COM") {
+  return prefix+"-"+Date.now().toString(36).toUpperCase().slice(-6);
+}
+
+$("complaintForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const category = $("category").value;
+  const title = $("title").value.trim();
+  const desc = $("desc").value.trim();
+  const isAnon = $("anonymous").checked;
+  if(!category || !title || !desc) return;
+
+  const complaints = JSON.parse(localStorage.getItem("complaints")||"[]");
+
+  const complaintId = generateUniqueId();
+
+  complaints.push({
+    complaintId,
+    category,
+    title,
+    desc,
+    studentId: isAnon ? null : active.uniqueId,
+    regno: isAnon ? null : active.regno,
+    name: isAnon ? "Anonymous" : active.name,
+    date: new Date().toLocaleString(),
+    status: "Pending",
+    anonymous: isAnon
+  });
+
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  $("msg").textContent = `Complaint submitted! ID: ${complaintId}`;
+
+  // Reset form
+  $("category").value = "";
+  $("title").value = "";
+  $("desc").value = "";
+  $("anonymous").checked = false;
+});
+
+$("logoutLink").addEventListener("click",()=>{
+  localStorage.removeItem("activeStudent");
+  location.href="login.html";
+});
+</script>
+</body>
+</html>

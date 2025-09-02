@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Verification – HAFEDPOLY</title>
+<style>
+  *{box-sizing:border-box;font-family:Poppins,system-ui,Segoe UI,Roboto,Ubuntu,Arial;}
+  body{min-height:100vh;margin:0;background:#f0f4f8;}
+  header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1);}
+  .hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+  .hamburger span{display:block;height:3px;background:#007bff;border-radius:2px;transition:.3s}
+  .hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg)}
+  .hamburger.active span:nth-child(2){opacity:0}
+  .hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg)}
+  nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;z-index:999}
+  nav.active{right:0}
+  nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600}
+  .container{padding:20px;max-width:1000px;margin:0 auto}
+  h2{color:#007bff;margin-bottom:12px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  th, td{border:1px solid #ccc;padding:8px;text-align:left;}
+  th{background:#e6f3ff;}
+  button{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;margin-right:4px;}
+  .edit{background:#007bff;color:#fff;}
+  .delete{background:#dc3545;color:#fff;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Admin Verification</h1>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+
+<nav id="nav">
+  <a href="admin-dashboard.html">Dashboard</a>
+  <a href="admin-verify.html">Verify</a>
+  <a href="admin-announcements.html">Announcements</a>
+  <a href="admin-students.html">Students</a>
+  <a href="#" id="logoutLink">Logout</a>
+</nav>
+
+<div class="container">
+
+  <h2>Verify Students</h2>
+  <table>
+    <thead>
+      <tr><th>Reg No</th><th>Name</th><th>Email</th><th>Verified</th><th>Action</th></tr>
+    </thead>
+    <tbody id="verifyStudentsBody"></tbody>
+  </table>
+
+  <h2>Verify Complaints</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Student</th><th>Category</th><th>Text</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody id="verifyComplaintsBody"></tbody>
+  </table>
+
+  <h2>Verify Suggestions</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Student</th><th>Text</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody id="verifySuggestionsBody"></tbody>
+  </table>
+
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const hamburger=$("hamburger");
+const nav=$("nav");
+hamburger.onclick=()=>{hamburger.classList.toggle("active");nav.classList.toggle("active");};
+
+// Logout
+$("logoutLink").addEventListener("click",e=>{e.preventDefault();localStorage.removeItem("activeStudent");location.href="login.html";});
+
+// --- Student Verification ---
+function loadVerifyStudents(){
+  const students = JSON.parse(localStorage.getItem("users")||"[]").filter(u=>u.role==="student");
+  const tbody=$("verifyStudentsBody");
+  tbody.innerHTML="";
+  students.forEach(s=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${s.regno}</td><td>${s.name}</td><td>${s.email}</td><td>${s.verified?"Yes":"No"}</td>
+      <td><button class="edit" onclick='toggleVerifyStudent("${s.regno}")'>${s.verified?"Unverify":"Verify"}</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleVerifyStudent(regno){
+  const users=JSON.parse(localStorage.getItem("users")||"[]");
+  const student=users.find(u=>u.regno===regno);
+  if(!student)return alert("Student not found.");
+  student.verified=!student.verified;
+  localStorage.setItem("users",JSON.stringify(users));
+  loadVerifyStudents();
+}
+
+// --- Complaints Verification ---
+function loadVerifyComplaints(){
+  const complaints=JSON.parse(localStorage.getItem("complaints")||"[]");
+  const tbody=$("verifyComplaintsBody");
+  tbody.innerHTML="";
+  complaints.forEach(c=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${c.id}</td><td>${c.studentName}</td><td>${c.category}</td><td>${c.text}</td><td>${c.status||"Pending"}</td>
+      <td><button class="edit" onclick='verifyComplaint("${c.id}")'>Verify</button><button class="delete" onclick='rejectComplaint("${c.id}")'>Reject</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function verifyComplaint(id){
+  const complaints=JSON.parse(localStorage.getItem("complaints")||"[]");
+  const c=complaints.find(x=>x.id===id);
+  if(!c)return alert("Complaint not found");
+  c.status="Verified";
+  localStorage.setItem("complaints",JSON.stringify(complaints));
+  loadVerifyComplaints();
+}
+
+function rejectComplaint(id){
+  const complaints=JSON.parse(localStorage.getItem("complaints")||"[]");
+  const idx=complaints.findIndex(x=>x.id===id);
+  if(idx===-1)return alert("Complaint not found");
+  complaints.splice(idx,1);
+  localStorage.setItem("complaints",JSON.stringify(complaints));
+  loadVerifyComplaints();
+}
+
+// --- Suggestions Verification ---
+function loadVerifySuggestions(){
+  const suggestions=JSON.parse(localStorage.getItem("suggestions")||"[]");
+  const tbody=$("verifySuggestionsBody");
+  tbody.innerHTML="";
+  suggestions.forEach(s=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${s.id}</td><td>${s.studentName}</td><td>${s.text}</td><td>${s.status||"Pending"}</td>
+      <td><button class="edit" onclick='verifySuggestion("${s.id}")'>Verify</button><button class="delete" onclick='rejectSuggestion("${s.id}")'>Reject</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function verifySuggestion(id){
+  const suggestions=JSON.parse(localStorage.getItem("suggestions")||"[]");
+  const s=suggestions.find(x=>x.id===id);
+  if(!s)return alert("Suggestion not found");
+  s.status="Verified";
+  localStorage.setItem("suggestions",JSON.stringify(suggestions));
+  loadVerifySuggestions();
+}
+
+function rejectSuggestion(id){
+  const suggestions=JSON.parse(localStorage.getItem("suggestions")||"[]");
+  const idx=suggestions.findIndex(x=>x.id===id);
+  if(idx===-1)return alert("Suggestion not found");
+  suggestions.splice(idx,1);
+  localStorage.setItem("suggestions",JSON.stringify(suggestions));
+  loadVerifySuggestions();
+}
+
+// Load all verification lists
+loadVerifyStudents();
+loadVerifyComplaints();
+loadVerifySuggestions();
+</script>
+
+</body>
+</html>
