@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Reports – HAFEDPOLY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
+body{margin:0;background:#f0f2f5;color:#333;}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+header h1{margin:0;color:#007bff;}
+.hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+.hamburger span{height:3px;background:#007bff;border-radius:2px;display:block;}
+.hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg);}
+nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;}
+nav.active{right:0;}
+nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600;}
+.container{padding:20px;max-width:1100px;margin:20px auto;}
+h2{color:#007bff;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.1);margin-bottom:30px;}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #ddd;}
+th{background:#007bff;color:#fff;}
+.chartBox{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);margin-bottom:30px;}
+canvas{max-width:100%;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Admin Reports</h1>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</header>
+
+<nav id="nav">
+  <a href="admin-dashboard.html">Dashboard</a>
+  <a href="admin-complaint.html">Complaints</a>
+  <a href="admin-suggestion.html">Suggestions</a>
+  <a href="admin-announcement.html">Announcements</a>
+  <a href="admin-verify.html">Verify IDs</a>
+  <a href="admin-report.html">Reports</a>
+  <a href="#" id="logoutLink">Logout</a>
+</nav>
+
+<div class="container">
+  <h2>Most Reported Complaints</h2>
+  <div class="chartBox"><canvas id="complaintChart"></canvas></div>
+  <table>
+    <thead>
+      <tr><th>Category</th><th>Count</th></tr>
+    </thead>
+    <tbody id="complaintsReport"></tbody>
+  </table>
+
+  <h2>Most Reported Suggestions</h2>
+  <div class="chartBox"><canvas id="suggestionChart"></canvas></div>
+  <table>
+    <thead>
+      <tr><th>Category</th><th>Count</th></tr>
+    </thead>
+    <tbody id="suggestionsReport"></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const hamburger=$("hamburger"), nav=$("nav");
+hamburger.onclick=()=>{hamburger.classList.toggle("active");nav.classList.toggle("active");};
+$("logoutLink").addEventListener("click",()=>{ localStorage.removeItem("activeAdmin"); location.href="login.html"; });
+
+// Count helper
+function countByCategory(items){
+  const counts={};
+  items.forEach(it=>{
+    const cat=it.category||"Uncategorized";
+    counts[cat]=(counts[cat]||0)+1;
+  });
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+}
+
+// Load Reports
+function loadReports(){
+  const complaints=JSON.parse(localStorage.getItem("complaints")||"[]");
+  const suggestions=JSON.parse(localStorage.getItem("suggestions")||"[]");
+
+  // Complaints
+  const cReport=$("complaintsReport"); cReport.innerHTML="";
+  const cData=countByCategory(complaints);
+  cData.forEach(([cat,count])=>{
+    cReport.innerHTML+=`<tr><td>${cat}</td><td>${count}</td></tr>`;
+  });
+
+  // Suggestions
+  const sReport=$("suggestionsReport"); sReport.innerHTML="";
+  const sData=countByCategory(suggestions);
+  sData.forEach(([cat,count])=>{
+    sReport.innerHTML+=`<tr><td>${cat}</td><td>${count}</td></tr>`;
+  });
+
+  // Charts
+  renderChart("complaintChart","Complaints by Category",cData);
+  renderChart("suggestionChart","Suggestions by Category",sData);
+}
+
+// Render chart with Chart.js
+function renderChart(canvasId,label,data){
+  const ctx=$(canvasId).getContext("2d");
+  new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:data.map(d=>d[0]),
+      datasets:[{
+        label:label,
+        data:data.map(d=>d[1]),
+        backgroundColor:"#007bff"
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{y:{beginAtZero:true}}
+    }
+  });
+}
+
+// Init
+loadReports();
+</script>
+
+</body>
+</html>
