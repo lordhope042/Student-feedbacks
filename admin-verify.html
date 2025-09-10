@@ -18,9 +18,14 @@ nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;bo
 nav.active{right:0;}
 nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600;}
 .container{padding:20px;max-width:800px;margin:40px auto;}
-input{padding:10px 12px;border:1px solid #ccc;border-radius:6px;width:70%;font-size:16px;}
-input:focus{outline:none;border-color:#007bff;box-shadow:0 0 0 4px rgba(0,123,255,.12);}
-button{padding:10px 14px;margin-left:10px;border:none;border-radius:6px;background:#007bff;color:#fff;font-weight:600;cursor:pointer;}
+.search-bar{display:flex;gap:10px;}
+input{flex:1;padding:10px 12px;border:1px solid #ccc;border-radius:6px;font-size:16px;}
+input:focus,textarea:focus{
+  border-color:#007bff;
+  box-shadow:0 0 0 4px rgba(0,123,255,.12);
+  outline:none;
+}
+button{padding:10px 14px;border:none;border-radius:6px;background:#007bff;color:#fff;font-weight:600;cursor:pointer;}
 button:hover{background:#005ecb;}
 .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);margin-top:20px;}
 .card h3{margin-top:0;color:#007bff;}
@@ -41,108 +46,137 @@ button:hover{background:#005ecb;}
 
 <nav id="nav">
   <a href="admin-dashboard.html">Dashboard</a>
-  <a href="admin-complaint.html">Complaints</a>
+    <a href="admin-complaint.html">Complaints</a>
   <a href="admin-suggestion.html">Suggestions</a>
+   <a href="admin-announcement.html">Announcements</a>
+   <a href="admin-announcement.html">Verify IDs</a>
+  <a href="admin-report.html">Admin report</a>
   <a href="#" id="logoutLink">Logout</a>
 </nav>
 
 <div class="container">
-  <input type="text" id="searchInput" placeholder="Enter Student ID, Complaint ID, Suggestion ID, or Reg No">
-  <button id="searchBtn">Search</button>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Enter Student ID, Reg No, Complaint ID, Suggestion ID, or Email" autofocus>
+    <button id="searchBtn">Search</button>
+  </div>
   <div id="result"></div>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
-const hamburger = $("hamburger"), nav = $("nav");
+const hamburger=$("hamburger"), nav=$("nav");
+hamburger.onclick=()=>{hamburger.classList.toggle("active");nav.classList.toggle("active");};
+$("logoutLink").addEventListener("click",()=>{localStorage.removeItem("activeAdmin");location.href="login.html";});
 
-hamburger.onclick = () => { hamburger.classList.toggle("active"); nav.classList.toggle("active"); };
-$("logoutLink").addEventListener("click", () => { localStorage.removeItem("activeAdmin"); location.href="login.html"; });
-
-// Get student details from users
-function getStudent(studentId){
-    const users = JSON.parse(localStorage.getItem("users")||"[]");
-    return users.find(u => u.uniqueId === studentId && u.role === "student") || {};
-}
-
-// Render the card for a found item
-function showItem(item){
-    const student = item.anonymous ? {} : getStudent(item.studentId);
-    return `
-        <div class="card">
-            <h3>${item.type}: ${item.complaintId || item.suggestionId}</h3>
-            <p><strong>Student ID:</strong> ${item.anonymous ? "Anonymous" : (student.uniqueId || "N/A")}</p>
-            <p><strong>Reg No:</strong> ${item.anonymous ? "null" : (student.regno || "N/A")}</p>
-            <p><strong>Name:</strong> ${item.anonymous ? "Anonymous" : (student.name || "N/A")}</p>
-            <p><strong>Level:</strong> ${item.anonymous ? "N/A" : (student.level || "N/A")}</p>
-            <p><strong>Category:</strong> ${item.category || "N/A"}</p>
-            <p><strong>Title:</strong> ${item.title || "N/A"}</p>
-            <p><strong>Description:</strong> ${item.desc || "N/A"}</p>
-            <p><strong>Status:</strong> ${item.status || "Pending"}</p>
-            <p><strong>Verifier:</strong> ${item.verifier || "N/A"}</p>
-            <button class="btn-verify">${item.status==="Verified"?"Verified":"Verify"}</button>
-            <button class="btn-delete">Delete</button>
-        </div>
-    `;
+// Display result card
+function showItem(item, student){
+  return `
+    <div class="card">
+      <h3>${item.type} – ${item.complaintId || item.suggestionId || student?.uniqueId || "N/A"}</h3>
+      ${student ? `
+        <p><strong>Name:</strong> ${student.name}</p>
+        <p><strong>Email:</strong> ${student.email}</p>
+        <p><strong>Reg No:</strong> ${student.regno}</p>
+        <p><strong>Level:</strong> ${student.level}</p>
+        <p><strong>Department:</strong> ${student.department}</p>
+        <p><strong>Student ID:</strong> ${student.uniqueId}</p>
+      ` : ""}
+      ${item.type!=="Student"?`
+        <p><strong>Category:</strong> ${item.category||""}</p>
+        <p><strong>Title:</strong> ${item.title||""}</p>
+        <p><strong>Description:</strong> ${item.desc||""}</p>
+        <p><strong>Status:</strong> ${item.status||"Pending"}</p>
+        <p><strong>Verifier:</strong> ${item.verifier||"N/A"}</p>
+        <button class="btn-verify">${item.status==="Verified"?"Verified":"Verify"}</button>
+        <button class="btn-delete">Delete</button>
+      `:""}
+    </div>
+  `;
 }
 
 // Search logic
 function searchItem(){
-    const filter = $("searchInput").value.trim().toLowerCase();
-    if(!filter) return alert("Please enter an ID or Reg No.");
+  const filter = $("searchInput").value.trim().toLowerCase();
+  if(!filter) return alert("Please enter an ID, Reg No, or Email.");
 
-    const complaints = JSON.parse(localStorage.getItem("complaints")||"[]");
-    const suggestions = JSON.parse(localStorage.getItem("suggestions")||"[]");
+  const users = JSON.parse(localStorage.getItem("users")||"[]");
+  const complaints = JSON.parse(localStorage.getItem("complaints")||"[]");
+  const suggestions = JSON.parse(localStorage.getItem("suggestions")||"[]");
 
-    const allItems = complaints.map(c => ({...c, type:"Complaint"}))
-                              .concat(suggestions.map(s => ({...s, type:"Suggestion"})));
+  let found=null, student=null;
 
-    const found = allItems.find(item => {
-        const idVal = (item.complaintId || item.suggestionId || "").toLowerCase();
-        const studentId = (item.studentId || "").toLowerCase();
-        const student = getStudent(item.studentId);
-        const regNo = (student.regno || "").toLowerCase();
-        return [idVal, studentId, regNo].includes(filter);
-    });
+  // Search student
+  student = users.find(u=>
+    u.uniqueId?.toLowerCase()===filter ||
+    u.regno?.toLowerCase()===filter ||
+    u.email?.toLowerCase()===filter
+  );
+  if(student) found={...student,type:"💡Student"};
 
-    const container = $("result");
-    container.innerHTML = "";
+  // Search complaint
+  if(!found){
+    const c = complaints.find(c=>
+      c.complaintId?.toLowerCase()===filter ||
+      c.studentId?.toLowerCase()===filter
+    );
+    if(c){ found={...c,type:"💡Complaint"}; student = users.find(u=>u.uniqueId===c.studentId)||null; }
+  }
 
-    if(!found) return container.innerHTML="<p>No record found.</p>";
+  // Search suggestion
+  if(!found){
+    const s = suggestions.find(s=>
+      s.suggestionId?.toLowerCase()===filter ||
+      s.studentId?.toLowerCase()===filter
+    );
+    if(s){ found={...s,type:"💡Suggestion"}; student = users.find(u=>u.uniqueId===s.studentId)||null; }
+  }
 
-    container.innerHTML = showItem(found);
+  const container=$("result"); container.innerHTML="";
 
-    const card = container.firstElementChild;
+  if(!found){ container.innerHTML="<p>No record found.</p>"; return; }
 
-    // Verify button
-    card.querySelector(".btn-verify").onclick = () => {
-        if(found.status==="Verified") return;
-        found.status = "Verified";
-        found.verifier = "Admin";
-        if(found.type==="Complaint") localStorage.setItem("complaints", JSON.stringify(complaints));
-        else localStorage.setItem("suggestions", JSON.stringify(suggestions));
-        searchItem();
+  container.innerHTML=showItem(found,student);
+
+  // Button actions
+  const card=container.firstElementChild;
+  if(found.type!=="Student"){
+    card.querySelector(".btn-verify").onclick=()=>{
+      if(found.status==="Verified") return;
+      found.status="Verified";
+      found.verifier="Admin";
+
+      if(found.type==="Complaint"){
+        const idx=complaints.findIndex(c=>c.complaintId===found.complaintId);
+        if(idx>-1) complaints[idx]=found;
+        localStorage.setItem("complaints",JSON.stringify(complaints));
+      }else{
+        const idx=suggestions.findIndex(s=>s.suggestionId===found.suggestionId);
+        if(idx>-1) suggestions[idx]=found;
+        localStorage.setItem("suggestions",JSON.stringify(suggestions));
+      }
+      searchItem();
     };
 
-    // Delete button
-    card.querySelector(".btn-delete").onclick = () => {
-        if(confirm("Delete this entry?")){
-            if(found.type==="Complaint"){
-                complaints.splice(complaints.indexOf(found),1);
-                localStorage.setItem("complaints", JSON.stringify(complaints));
-            } else {
-                suggestions.splice(suggestions.indexOf(found),1);
-                localStorage.setItem("suggestions", JSON.stringify(suggestions));
-            }
-            container.innerHTML="<p>Entry deleted.</p>";
-        }
+    card.querySelector(".btn-delete").onclick=()=>{
+      if(!confirm("Delete this entry?")) return;
+      if(found.type==="Complaint"){
+        const idx=complaints.findIndex(c=>c.complaintId===found.complaintId);
+        if(idx>-1) complaints.splice(idx,1);
+        localStorage.setItem("complaints",JSON.stringify(complaints));
+      }else{
+        const idx=suggestions.findIndex(s=>s.suggestionId===found.suggestionId);
+        if(idx>-1) suggestions.splice(idx,1);
+        localStorage.setItem("suggestions",JSON.stringify(suggestions));
+      }
+      container.innerHTML="<p>Entry deleted.</p>";
     };
+  }
 }
 
-// Event listeners
-$("searchBtn").addEventListener("click", searchItem);
-$("searchInput").addEventListener("keypress", e => { if(e.key==="Enter"){ e.preventDefault(); searchItem(); } });
-
+// Events
+$("searchBtn").addEventListener("click",searchItem);
+$("searchInput").addEventListener("keypress",e=>{ if(e.key==="Enter"){ e.preventDefault(); searchItem(); } });
+window.onload=()=>{ $("searchInput").focus(); };
 </script>
 
 </body>
