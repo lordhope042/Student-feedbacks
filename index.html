@@ -5,53 +5,64 @@
   <title>HAFEDPOLY Portal – Landing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;}
-    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(135deg,#007bff,#00c6ff);}
-    
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;margin:0;padding:0;}
+    body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;background:linear-gradient(135deg,#007bff,#00c6ff);scroll-behavior:smooth;}
+
     /* Box styling */
-    .box{width:100%;max-width:500px;background:#fff;border-radius:16px;padding:24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:fade .5s ease}
+    .box{width:100%;max-width:500px;background:#fff;border-radius:16px;padding:24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:fade .5s ease;margin-bottom:40px;}
     @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    
+
     h1{margin:10px 0;color:#007bff;font-size:24px}
     p.sub{margin:8px 0 20px;color:#555}
-
     .btn{display:inline-block;padding:12px 20px;margin:8px;border-radius:10px;background:#007bff;color:#fff;text-decoration:none;font-weight:600;transition:.2s}
     .btn:hover{background:#005ecb}
-    
+
     /* Hero image */
     .hero-img{width:120px;height:120px;object-fit:contain;margin-bottom:12px;border-radius:50%}
-    
+
     /* Hamburger */
     .hamburger{position:fixed;top:20px;right:20px;width:30px;height:22px;cursor:pointer;z-index:1001}
     .hamburger span{display:block;height:4px;background:#2A2EBD;margin:5px 0;border-radius:2px;transition:.4s}
     .hamburger.active span:nth-child(1){transform:translateY(9px) rotate(45deg)}
     .hamburger.active span:nth-child(2){opacity:0}
     .hamburger.active span:nth-child(3){transform:translateY(-9px) rotate(-45deg)}
-    
+
     /* Sidebar menu */
     .menu{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-3px 0 10px rgba(0,0,0,.15);padding:40px 20px;transition:.4s;z-index:1000}
     .menu.active{right:0}
-    .menu a{display:block;margin:15px 0;color:#007bff;text-decoration:none;font-weight:600}
+    .menu a{display:block;margin:15px 0;color:#007bff;text-decoration:none;font-weight:600;transition:.2s}
     .menu a:hover{color:#005ecb}
+
+    /* About & Contact Sections */
+    section{width:100%;max-width:600px;background:#fff;border-radius:16px;padding:24px;margin:20px 0;box-shadow:0 8px 25px rgba(0,0,0,.1);}
+    section h2{color:#007bff;margin-bottom:12px;font-size:22px;}
+    section p{color:#555;line-height:1.5;}
+
+    /* Responsive */
+    @media (max-width:480px){
+      .box, section{padding:16px;}
+      .btn{padding:10px 16px;}
+    }
   </style>
 </head>
 <body>
+
   <!-- Hamburger -->
-  <div class="hamburger" id="hamburger">
+  <div class="hamburger" id="hamburger" aria-label="Open menu">
     <span></span><span></span><span></span>
   </div>
 
   <!-- Sidebar Menu -->
-  <div class="menu" id="menu">
-    <a href="index.html">Home</a>
+  <div class="menu" id="menu" role="navigation">
+    <a href="#home">Home</a>
     <a href="register.html">Register</a>
     <a href="login.html">Login</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
   </div>
 
   <!-- Main Box -->
-  <div class="box">
+  <div class="box" id="home">
     <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="Student Portal" class="hero-img">
     <h1>Welcome to HAFEDPOLY Portal</h1>
     <p class="sub">Submit complaints, suggestions & track responses easily.</p>
@@ -59,14 +70,34 @@
     <a href="login.html" class="btn">Login</a>
   </div>
 
+  <!-- About Section -->
+  <section id="about">
+    <h2>About HAFEDPOLY Portal</h2>
+    <p>The HAFEDPOLY Portal is designed to simplify communication between students and the administration. You can submit complaints, provide suggestions, and track responses in real-time.</p>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or need support? Reach out to our team via email at <strong>support@hafedpoly.edu</strong> or call us at <strong>+123 456 7890</strong>. We’re here to help!</p>
+  </section>
+
   <script>
     const ham = document.getElementById("hamburger");
     const menu = document.getElementById("menu");
 
-    ham.onclick = () => {
+    ham.addEventListener("click", () => {
       ham.classList.toggle("active");
       menu.classList.toggle("active");
-    };
+    });
+
+    // Close menu when a link is clicked
+    document.querySelectorAll(".menu a").forEach(link => {
+      link.addEventListener("click", () => {
+        ham.classList.remove("active");
+        menu.classList.remove("active");
+      });
+    });
   </script>
 </body>
-</html>
+    </html>
