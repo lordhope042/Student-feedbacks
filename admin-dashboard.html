@@ -23,7 +23,12 @@
     table{width:100%;border-collapse:collapse;margin-top:12px;}
     th, td{border:1px solid #ccc;padding:8px;text-align:left;}
     th{background:#007bff;color:#fff;}
-    button.action{padding:6px 10px;margin-right:4px;border:none;border-radius:6px;cursor:pointer;color:#fff;}
+    button.action{padding:6px 10px;
+    margin-right:4px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    color:#fff;}
     .impersonate{background:#28a745;}
     .showpw{background:#17a2b8;}
     .edit{background:#ffc107;color:#000;}
@@ -39,11 +44,11 @@
 <nav id="nav">
   <a href="#dashboard">Dashboard</a>
   <a href="#students">Students</a>
-  <a href="admin-complaints.html">Complaints</a>
-  <a href="#suggestions">Suggestions</a>
-  <a href="#orders">Orders</a>
+  <a href="admin-complaint.html">Complaints</a>
+  <a href="admin-suggestion.html">Suggestions</a>
   <a href="admin-verify.html">Verify IDs</a>
-  <a href="#announcements">Announcements</a>
+  <a href="admin-announcement.html">Announcements</a>
+  <a href="admin-report.html">Admin report</a>
   <a href="#" id="logoutLink">Logout</a>
 </nav>
 
@@ -68,26 +73,6 @@
       <tbody id="studentsBody"></tbody>
     </table>
   </div>
-
-  <!-- Complaints -->
-  <div class="box" id="complaints">
-    <h2>Complaints</h2>
-    <p>List of complaints goes here.</p>
-  </div>
-
-  <!-- Suggestions -->
-  <div class="box" id="suggestions">
-    <h2>Suggestions</h2>
-    <p>List of suggestions goes here.</p>
-  </div>
-
-  <!-- Orders -->
-  <div class="box" id="orders">
-    <h2>Orders</h2>
-    <p>List of student orders goes here.</p>
-  </div>
-</div>
-
 <script>
 const $=id=>document.getElementById(id);
 const hamburger=$("hamburger");
@@ -161,7 +146,19 @@ $("logoutLink").addEventListener("click",e=>{
   localStorage.removeItem("activeStudent");
   window.location.href="login.html";
 });
+function loadTotals(){
+  const students = JSON.parse(localStorage.getItem("users") || "[]")
+    .filter(u => u.role === "student");
+  $("totalStudents").textContent = students.length;
 
+  const complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
+  $("totalComplaints").textContent = complaints.length;
+
+  const suggestions = JSON.parse(localStorage.getItem("suggestions") || "[]");
+  $("totalSuggestions").textContent = suggestions.length;
+}
+
+loadTotals();
 // Initialize
 loadOverview();
 </script>
