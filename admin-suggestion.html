@@ -9,16 +9,21 @@
 body{margin:0;background:#f0f2f5;color:#333;}
 header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.1);}
 header h1{margin:0;color:#007bff;}
-.hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
-.hamburger span{height:3px;background:#007bff;border-radius:2px;display:block;}
-.hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg);}
-.hamburger.active span:nth-child(2){opacity:0;}
-.hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg);}
+ .hamburger{width:28px;height:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+    .hamburger span{display:block;height:3px;background:#007bff;border-radius:2px;transition:.3s;}
+    .hamburger.active span:nth-child(1){transform:translateY(8.5px) rotate(45deg);}
+    .hamburger.active span:nth-child(2){opacity:0;}
+    .hamburger.active span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg);}
 nav{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,.15);padding:20px;transition:.3s;}
 nav.active{right:0;}
 nav a{display:block;margin:14px 0;color:#007bff;text-decoration:none;font-weight:600;}
 .container{padding:20px;max-width:1200px;margin:20px auto;}
 input{padding:8px 12px;border:1px solid #ccc;border-radius:6px;width:300px;margin-bottom:12px;}
+input:focus,textarea:focus{
+  border-color:#007bff;
+  box-shadow:0 0 0 4px rgba(0,123,255,.12);
+  outline:none;
+}
 table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.1);}
 th,td{padding:12px;text-align:left;border-bottom:1px solid #ddd;}
 th{background:#007bff;color:#fff;}
@@ -40,9 +45,11 @@ td.actions button{margin-right:6px;padding:6px 12px;border:none;border-radius:6p
 
 <nav id="nav">
   <a href="admin-dashboard.html">Dashboard</a>
-  <a href="admin-complaints.html">Complaints</a>
-  <a href="admin-suggestions.html">Suggestions</a>
-  <a href="admin-verify.html">Verify</a>
+  <a href="admin-complaint.html">Complaints</a>
+  <a href="admin-suggestion.html">Suggestions</a>
+  <a href="admin-announcement.html">Announcements</a>
+  <a href="admin-verify.html">Verify IDs</a>
+  <a href="admin-report.html">Admin report</a>
   <a href="#" id="logoutLink">Logout</a>
 </nav>
 
@@ -76,32 +83,48 @@ function loadSuggestions(filter=""){
   const tbody=$("tableBody"); tbody.innerHTML="";
   suggestions.forEach((s,i)=>{
     if(filter && !(s.suggestionId?.toLowerCase().includes(filter) || (s.studentId||"").toLowerCase().includes(filter) || (s.regno||"").toLowerCase().includes(filter))) return;
+
+    // Ensure flags exist
+    if(typeof s.verified==="undefined") s.verified=false;
+    if(typeof s.resolved==="undefined") s.resolved=false;
+
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${s.suggestionId||"N/A"}</td>
+    tr.innerHTML=`
+      <td>${s.suggestionId||"N/A"}</td>
       <td>${s.category||"N/A"}</td>
       <td>${s.title||"N/A"}</td>
       <td>${s.desc||"N/A"}</td>
       <td>${s.anonymous?"null":(s.studentId||"N/A")}</td>
       <td>${s.anonymous?"null":(s.regno||"N/A")}</td>
-      <td>${s.status||"Pending"}</td>
+      <td>
+        ${s.verified ? "Verified" : "Pending"} /
+        ${s.resolved ? "Resolved" : "Open"}
+      </td>
       <td class="actions">
-        <button class="btn-verify">Verify</button>
-        <button class="btn-resolve">${s.status==="Resolved"?"Resolved":"Resolve"}</button>
+        <button class="btn-verify">${s.verified?"Verified":"Verify"}</button>
+        <button class="btn-resolve">${s.resolved?"Resolved":"Resolve"}</button>
         <button class="btn-delete">Delete</button>
       </td>`;
     tbody.appendChild(tr);
 
-    tr.querySelector(".btn-verify").onclick=()=>{ alert(
-      `Suggestion ID: ${s.suggestionId}\nCategory: ${s.category}\nTitle: ${s.title}\nDescription: ${s.desc}\nStudent ID: ${s.anonymous?"null":s.studentId}\nReg No: ${s.anonymous?"null":s.regno}\nStatus: ${s.status}`
-    ); };
-
-    tr.querySelector(".btn-resolve").onclick=()=>{
-      if(s.status==="Resolved") return;
-      s.status="Resolved";
+    // ✅ Verify button
+    tr.querySelector(".btn-verify").onclick=()=>{
+      if(s.verified){ alert("Already verified."); return; }
+      s.verified=true;
+      s.verifier="Admin";
       localStorage.setItem("suggestions",JSON.stringify(suggestions));
       loadSuggestions($("searchInput").value.toLowerCase());
     };
 
+    // ✅ Resolve button
+    tr.querySelector(".btn-resolve").onclick=()=>{
+      if(s.resolved) return;
+      s.resolved=true;
+      localStorage.setItem("suggestions",JSON.stringify(suggestions));
+      loadSuggestions($("searchInput").value.toLowerCase());
+    };
+
+    // ✅ Delete button
     tr.querySelector(".btn-delete").onclick=()=>{
       if(confirm("Delete this suggestion?")){
         suggestions.splice(i,1);
@@ -117,3 +140,4 @@ loadSuggestions();
 </script>
 
 </body>
+</html>
