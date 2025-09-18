@@ -5,241 +5,67 @@
   <title>HAFEDPOLY Portal – Landing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+    *{box-sizing:border-box;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;margin:0;padding:0;}
+    body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;background:linear-gradient(135deg,#007bff,#00c6ff);scroll-behavior:smooth;}
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 16px;
-      background: linear-gradient(135deg, #0062e6, #33aeff);
-      scroll-behavior: smooth;
-      color: #222;
-    }
+    /* Box styling */
+    .box{width:100%;max-width:500px;background:#fff;border-radius:16px;padding:24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:fade .5s ease;margin-bottom:40px;}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    h1, h2 {
-      font-weight: 700;
-    }
-
-    p {
-      line-height: 1.6;
-    }
-
-    /* Header Box */
-    .box {
-      width: 100%;
-      max-width: 650px;
-      background: #fff;
-      border-radius: 20px;
-      padding: 32px 28px;
-      text-align: center;
-      box-shadow: 0 10px 35px rgba(0,0,0,.15);
-      animation: fade .6s ease;
-      margin-bottom: 50px;
-    }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 {
-      margin: 12px 0;
-      color: #0062e6;
-      font-size: 28px;
-    }
-    p.sub {
-      margin: 10px 0 22px;
-      color: #666;
-      font-size: 15px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 8px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0062e6, #0051c7);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 600;
-      transition: .25s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,.15);
-    }
-    .btn:hover {
-      background: linear-gradient(135deg, #004bb8, #003f99);
-      transform: translateY(-2px);
-    }
+    h1{margin:10px 0;color:#007bff;font-size:24px}
+    p.sub{margin:8px 0 20px;color:#555}
+    .btn{display:inline-block;padding:12px 20px;margin:8px;border-radius:10px;background:#007bff;color:#fff;text-decoration:none;font-weight:600;transition:.2s}
+    .btn:hover{background:#005ecb}
 
     /* Hero image */
-    .hero-img {
-      width: 130px;
-      height: 130px;
-      object-fit: contain;
-      margin-bottom: 14px;
-      border-radius: 50%;
-      border: 4px solid #e9f3ff;
-    }
+    .hero-img{width:120px;height:120px;object-fit:contain;margin-bottom:12px;border-radius:50%}
 
     /* Hamburger */
-    .hamburger {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 32px;
-      height: 24px;
-      cursor: pointer;
-      z-index: 1001;
-    }
-    .hamburger span {
-      display: block;
-      height: 4px;
-      background: #fff;
-      margin: 5px 0;
-      border-radius: 2px;
-      transition: .4s;
-    }
-    .hamburger.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
-    .hamburger.active span:nth-child(2) { opacity: 0; }
-    .hamburger.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+    .hamburger{position:fixed;top:20px;right:20px;width:30px;height:22px;cursor:pointer;z-index:1001}
+    .hamburger span{display:block;height:4px;background:#2A2EBD;margin:5px 0;border-radius:2px;transition:.4s}
+    .hamburger.active span:nth-child(1){transform:translateY(9px) rotate(45deg)}
+    .hamburger.active span:nth-child(2){opacity:0}
+    .hamburger.active span:nth-child(3){transform:translateY(-9px) rotate(-45deg)}
 
     /* Sidebar menu */
-    nav.menu {
-      position: fixed;
-      top: 0;
-      right: -260px;
-      width: 240px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -3px 0 10px rgba(0,0,0,.15);
-      padding: 60px 20px;
-      transition: .4s;
-      z-index: 1000;
-    }
-    nav.menu.active { right: 0; }
-    nav.menu a {
-      display: block;
-      margin: 18px 0;
-      color: #0062e6;
-      text-decoration: none;
-      font-weight: 600;
-      transition: .25s;
-      padding: 10px 14px;
-      border-radius: 10px;
-    }
-    nav.menu a:hover {
-      background: #f4f8ff;
-      color: #004bb8;
-    }
+    .menu{position:fixed;top:0;right:-250px;width:220px;height:100%;background:#fff;box-shadow:-3px 0 10px rgba(0,0,0,.15);padding:40px 20px;transition:.4s;z-index:1000}
+    .menu.active{right:0}
+    .menu a{display:block;margin:15px 0;color:#007bff;text-decoration:none;font-weight:600;transition:.2s}
+    .menu a:hover{color:#005ecb}
 
-    /* Section styling */
-    section {
-      width: 100%;
-      max-width: 700px;
-      background: #fff;
-      border-radius: 20px;
-      padding: 32px;
-      margin: 28px 0;
-      box-shadow: 0 8px 30px rgba(0,0,0,.1);
-      transition: .3s;
-    }
-    section:hover {
-      transform: translateY(-3px);
-    }
-    section h2 {
-      color: #0062e6;
-      margin-bottom: 14px;
-      font-size: 24px;
-    }
-    section p {
-      color: #444;
-      margin-bottom: 12px;
-    }
-
-    /* Contact form */
-    .contact-form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .contact-form input, .contact-form textarea {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      width: 100%;
-    }
-    .contact-form textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-    .contact-form button {
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #0062e6, #0051c7);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      transition: .25s;
-    }
-    .contact-form button:hover {
-      background: linear-gradient(135deg, #004bb8, #003f99);
-    }
-
-    /* Footer */
-    footer {
-      margin-top: 30px;
-      text-align: center;
-      padding: 20px;
-      color: #fff;
-      font-size: 14px;
-    }
-    footer a {
-      color: #e6f0ff;
-      margin: 0 8px;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    /* About & Contact Sections */
+    section{width:100%;max-width:600px;background:#fff;border-radius:16px;padding:24px;margin:20px 0;box-shadow:0 8px 25px rgba(0,0,0,.1);}
+    section h2{color:#007bff;margin-bottom:12px;font-size:22px;}
+    section p{color:#555;line-height:1.5;}
 
     /* Responsive */
-    @media (max-width:480px) {
-      .box, section { padding: 20px; }
-      .btn { padding: 10px 18px; }
+    @media (max-width:480px){
+      .box, section{padding:16px;}
+      .btn{padding:10px 16px;}
     }
   </style>
 </head>
 <body>
 
   <!-- Hamburger -->
-  <div class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+  <div class="hamburger" id="hamburger" aria-label="Open menu">
     <span></span><span></span><span></span>
   </div>
 
   <!-- Sidebar Menu -->
-  <nav class="menu" id="menu" role="navigation">
-    <a href="#home">🏠 Home</a>
-    <a href="register.html">📝 Register</a>
-    <a href="login.html">🔑 Login</a>
-    <a href="#about">ℹ️ About</a>
-    <a href="#contact">📞 Contact</a>
-  </nav>
+  <div class="menu" id="menu" role="navigation">
+    <a href="#home">Home</a>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
 
   <!-- Main Box -->
   <div class="box" id="home">
     <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="Student Portal" class="hero-img">
     <h1>Welcome to HAFEDPOLY Portal</h1>
-    <p class="sub">Your one-stop platform to submit complaints, share suggestions, and track responses seamlessly.</p>
+    <p class="sub">Submit complaints, suggestions & track responses easily.</p>
     <a href="register.html" class="btn">Register</a>
     <a href="login.html" class="btn">Login</a>
   </div>
@@ -247,50 +73,22 @@
   <!-- About Section -->
   <section id="about">
     <h2>About HAFEDPOLY Portal</h2>
-    <p>The HAFEDPOLY Portal is designed to strengthen communication between students and the administration. Our goal is to ensure transparency and improve response times through an easy-to-use online platform.</p>
-    <p>With this portal, you can:</p>
-    <ul>
-      <li>✔️ Submit complaints directly to the right department</li>
-      <li>✔️ Share suggestions for academic or administrative improvements</li>
-      <li>✔️ Track the progress of your submissions in real-time</li>
-    </ul>
+    <p>The HAFEDPOLY Portal is designed to simplify communication between students and the administration. You can submit complaints, provide suggestions, and track responses in real-time.</p>
   </section>
 
   <!-- Contact Section -->
   <section id="contact">
     <h2>Contact Us</h2>
-    <p>If you have any issues or feedback, feel free to reach us through the form below or directly via email and phone.</p>
-
-    <form class="contact-form" action="mailto:support@hafedpoly.edu.ng" method="POST" enctype="text/plain">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" placeholder="Your Message" required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-
-    <p style="margin-top:15px;">📧 Email: <a href="mailto:support@hafedpoly.edu.ng">support@hafedpoly.edu.ng</a></p>
-    <p>📞 Phone: +234 800 000 0000</p>
+    <p>Have questions or need support? Reach out to our team via email at <strong>support@hafedpoly.edu</strong> or call us at <strong>+234 080 0000 0000</strong>. We’re here to help!</p>
   </section>
-
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 HAFEDPOLY Portal. All rights reserved.</p>
-    <p>
-      <a href="#home">Home</a> | 
-      <a href="#about">About</a> | 
-      <a href="#contact">Contact</a>
-    </p>
-  </footer>
 
   <script>
     const ham = document.getElementById("hamburger");
     const menu = document.getElementById("menu");
 
     ham.addEventListener("click", () => {
-      const isActive = ham.classList.toggle("active");
+      ham.classList.toggle("active");
       menu.classList.toggle("active");
-      ham.setAttribute("aria-expanded", isActive);
-      document.body.style.overflow = isActive ? "hidden" : "";
     });
 
     // Close menu when a link is clicked
@@ -298,10 +96,8 @@
       link.addEventListener("click", () => {
         ham.classList.remove("active");
         menu.classList.remove("active");
-        ham.setAttribute("aria-expanded", "false");
-        document.body.style.overflow = "";
       });
     });
   </script>
 </body>
-</html>
+  </html>
